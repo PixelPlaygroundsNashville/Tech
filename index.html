@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel Playgrounds // Nashville Creator Hub // Studio Installs</title> <meta name="description" content="Pixel Playgrounds: Nashville's hub for creators. Elite podcast studio installations, resources, community connections & consultations. Call (615) 606-4969."> <meta property="og:title" content="Pixel Playgrounds Nashville // Elite Podcast Studios & Creator Hub"> <meta property="og:description" content="Your Nashville source for podcast studio builds, creator resources, events, and expert consultation. Connect and create. Free consultation available."> <meta property="og:image" content="https://placehold.co/1200x630/010409/0cb7e2?text=Pixel+Playgrounds+Nashville+Hub&font=orbitron"> <meta property="og:url" content="https://YOUR_USERNAME.github.io/YOUR_REPO_NAME/">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2215%22 fill=%22%23010409%22/><path d=%22M30 70 L30 30 L70 30 L70 50 L50 50 L50 70 Z%22 fill=%22%23ffdf3a%22/><path d=%22M70 70 L70 60 L60 60 L60 70 Z%22 fill=%22%230cb7e2%22/><animateTransform attributeName=%22transform%22 type=%22rotate%22 from=%220 50 50%22 to=%2210 50 50%22 dur=%221s%22 repeatCount=%22indefinite%22/></svg>">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+
+    <style>
+        /* --- Cyberpunk Theme CSS V5 --- */
+        :root {
+            --color-background: #010307; /* Even darker */
+            --color-primary: #0afafa;   /* Cyan Neon */
+            --color-secondary: #fa0af0; /* Pink Neon */
+            --color-tertiary: #a060fa;  /* Purple Neon */
+            --color-accent: #fafa0a;   /* Yellow Neon */
+            --color-text: #e1ecf7;     /* Brighter Text */
+            --color-text-muted: #6a7c8c; /* Adjusted Muted */
+            --font-heading: 'Orbitron', sans-serif;
+            --font-body: 'Roboto Condensed', sans-serif;
+            --color-primary-rgb: 10, 250, 250;
+            --color-secondary-rgb: 250, 10, 240;
+            --color-tertiary-rgb: 160, 96, 250;
+            --color-accent-rgb: 250, 250, 10;
+            --color-text-muted-rgb: 106, 124, 140;
+        }
+        html { scroll-behavior: smooth; }
+        body { font-family: var(--font-body); background-color: var(--color-background); color: var(--color-text); overflow-x: hidden; font-size: 16px; line-height: 1.6; cursor: crosshair; /* Thematic cursor */ }
+        #galaxy-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; display: block; }
+        .content-wrapper { position: relative; z-index: 1; }
+        .content-wrapper::before { /* Scanlines */ content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; background-image: linear-gradient(rgba(var(--color-primary-rgb), 0.03) 1px, transparent 1px); background-size: 1px 2px; opacity: 0.2; pointer-events: none; animation: flicker 0.1s infinite alternate; }
+        @keyframes flicker { 0% { opacity: 0.15; } 100% { opacity: 0.25; } }
+
+        /* HUD Elements */
+        .hud-element { position: fixed; font-family: monospace; font-size: 0.7rem; color: rgba(var(--color-primary-rgb), 0.5); text-shadow: 0 0 3px rgba(var(--color-primary-rgb), 0.5); pointer-events: none; z-index: 100; opacity: 0; animation: fadeInHUD 2s 1s forwards; }
+        @keyframes fadeInHUD { to { opacity: 1; } }
+        .hud-top-left { top: 1rem; left: 1rem; }
+        .hud-top-right { top: 1rem; right: 1rem; text-align: right; }
+        .hud-bottom-left { bottom: 1rem; left: 1rem; }
+        .hud-bottom-right { bottom: 1rem; right: 1rem; text-align: right; }
+        .hud-bracket { border: 1px solid rgba(var(--color-primary-rgb), 0.3); width: 20px; height: 20px; }
+        .hud-bracket-tl { border-right: none; border-bottom: none; }
+        .hud-bracket-tr { border-left: none; border-bottom: none; }
+        .hud-bracket-bl { border-right: none; border-top: none; }
+        .hud-bracket-br { border-left: none; border-top: none; }
+
+        h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); color: var(--color-text); letter-spacing: 0.06em; text-transform: uppercase; position: relative; }
+        /* Glitch effect for headings */
+        .glitch-heading::after { content: attr(data-text); position: absolute; left: 2px; text-shadow: -1px 0 var(--color-secondary); top: 0; color: var(--color-text); background: var(--color-background); overflow: hidden; clip: rect(0, 900px, 0, 0); animation: noise-anim 2s infinite linear alternate-reverse; }
+        .glitch-heading::before { content: attr(data-text); position: absolute; left: -2px; text-shadow: 1px 0 var(--color-primary); top: 0; color: var(--color-text); background: var(--color-background); overflow: hidden; clip: rect(0, 900px, 0, 0); animation: noise-anim-2 3s infinite linear alternate-reverse; }
+        @keyframes noise-anim { 0% { clip: rect(61px, 9999px, 28px, 0); } /* Random clip values */ /* ... more steps ... */ 100% { clip: rect(4px, 9999px, 71px, 0); } }
+        @keyframes noise-anim-2 { 0% { clip: rect(73px, 9999px, 3px, 0); } /* ... more steps ... */ 100% { clip: rect(88px, 9999px, 47px, 0); } }
+
+        .container-command { max-width: 1100px; margin: 0 auto; padding: 0 1rem; }
+        .glow-primary { text-shadow: 0 0 6px var(--color-primary), 0 0 15px var(--color-primary), 0 0 25px var(--color-primary); }
+        .glow-secondary { text-shadow: 0 0 6px var(--color-secondary), 0 0 15px var(--color-secondary), 0 0 25px var(--color-secondary); }
+        .glow-tertiary { text-shadow: 0 0 6px var(--color-tertiary), 0 0 15px var(--color-tertiary), 0 0 25px var(--color-tertiary); }
+        .glow-accent { text-shadow: 0 0 6px var(--color-accent), 0 0 15px var(--color-accent), 0 0 25px var(--color-accent); }
+
+        .data-slate { background: rgba(5, 15, 30, 0.9); backdrop-filter: blur(12px) grayscale(0.1); border: 1px solid rgba(var(--color-primary-rgb), 0.6); box-shadow: inset 0 0 20px rgba(0,0,0,0.75), 0 6px 12px rgba(0,0,0,0.55); padding: 1.5rem 1.75rem; margin-bottom: 1.75rem; border-radius: 4px; /* Sharper */ transition: all 0.3s ease; position: relative; overflow: hidden; background-image: linear-gradient(rgba(var(--color-primary-rgb), 0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(var(--color-primary-rgb), 0.07) 1px, transparent 1px); background-size: 35px 35px; /* Larger grid */ }
+        .data-slate:hover { transform: translateY(-7px) scale(1.025) rotateX(1deg); border-color: rgba(var(--color-primary-rgb), 1); box-shadow: inset 0 0 15px rgba(0,0,0,0.65), 0 15px 30px rgba(var(--color-primary-rgb), 0.55); }
+
+        .warning-border { border: 2px solid; border-image-slice: 1; border-image-source: linear-gradient(to bottom right, var(--color-accent), var(--color-secondary)); box-shadow: 0 0 18px rgba(var(--color-accent-rgb), 0.6), 0 0 12px rgba(var(--color-secondary-rgb), 0.6); animation: pulse-border-warning 1.8s infinite alternate ease-in-out; }
+        @keyframes pulse-border-warning { 0% { box-shadow: 0 0 12px rgba(var(--color-accent-rgb), 0.5), 0 0 8px rgba(var(--color-secondary-rgb), 0.5); opacity: 0.8; } 100% { box-shadow: 0 0 35px rgba(var(--color-accent-rgb), 0.9), 0 0 25px rgba(var(--color-secondary-rgb), 0.9); opacity: 1; } }
+
+        #main-bridge { background: linear-gradient(to bottom, rgba(var(--color-background), 0.98), rgba(var(--color-background), 0.95)); backdrop-filter: blur(16px); border-bottom: 3px solid var(--color-primary); box-shadow: 0 4px 25px rgba(var(--color-primary-rgb), 0.3); position: sticky; top: 0; z-index: 50; padding: 0.75rem 0; }
+        .bridge-logo h1 { font-size: clamp(1.5rem, 4vw, 1.8rem); letter-spacing: 0.1em; }
+        .bridge-logo p { color: var(--color-accent); font-size: 0.65rem; letter-spacing: 0.15em; }
+        .nav-link { font-family: var(--font-heading); color: var(--color-text-muted); transition: all 0.3s; font-weight: 700; font-size: clamp(0.7rem, 2vw, 0.8rem); letter-spacing: 0.08em; padding: 0.6rem 0.9rem; border-radius: 4px; text-transform: uppercase; border: 1px solid transparent; position: relative; overflow: hidden; display: inline-flex; align-items: center; gap: 0.3em; }
+        .nav-link::before { content: ''; position: absolute; bottom: -2px; left: 0; width: 100%; height: 3px; background: var(--color-accent); box-shadow: 0 0 8px var(--color-accent), 0 0 12px var(--color-accent); transform: scaleX(0); transform-origin: center; transition: transform 0.35s cubic-bezier(0.23, 1, 0.32, 1); }
+        .nav-link:hover { color: var(--color-text); text-shadow: 0 0 10px var(--color-accent); }
+        .nav-link:hover::before { transform: scaleX(1); }
+        .nav-link.insta-link:hover::before { background: var(--color-secondary); box-shadow: 0 0 8px var(--color-secondary), 0 0 12px var(--color-secondary); }
+        .nav-link.insta-link:hover { text-shadow: 0 0 10px var(--color-secondary); }
+        .nav-link.direct-call-link:hover::before { background: var(--color-accent); box-shadow: 0 0 8px var(--color-accent), 0 0 12px var(--color-accent); }
+        .nav-link.direct-call-link:hover { text-shadow: 0 0 10px var(--color-accent); }
+
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5em; font-family: var(--font-heading); border-radius: 4px; transition: all 0.25s ease-out; text-align: center; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; position: relative; overflow: hidden; padding: 0.8rem 1.8rem; font-size: clamp(0.9rem, 2.5vw, 1rem); border-width: 2px; border-style: solid; transform-style: preserve-3d; }
+        .btn svg { width: 1.1em; height: 1.1em; }
+        .btn-directive { font-weight: 900; padding: 1rem 2.5rem; border-color: var(--color-accent); background-color: var(--color-accent); color: var(--color-background); font-size: clamp(0.9rem, 2.5vw, 1.1rem); box-shadow: 0 0 18px rgba(var(--color-accent-rgb), 0.5), inset 0 0 8px rgba(255,255,255,0.3); }
+        .btn-directive::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: var(--color-secondary); border: 2px solid var(--color-secondary); border-radius: 4px; transform: translateZ(-12px) scale(0.9); opacity: 0; transition: transform 0.3s ease, opacity 0.3s ease; box-shadow: 0 0 18px rgba(var(--color-secondary-rgb), 0.6); }
+        .btn-directive:hover { box-shadow: 0 0 35px rgba(var(--color-accent-rgb), 0.9), 0 0 20px rgba(var(--color-secondary-rgb), 0.6); transform: translateY(-5px) rotateX(-7deg) scale(1.03); background-color: var(--color-accent); border-color: var(--color-accent); }
+        .btn-directive:hover::before { transform: translateZ(0px) scale(1); opacity: 1; }
+        .btn-secondary-ops { font-weight: 700; padding: 0.7rem 1.8rem; border-color: var(--color-tertiary); background-color: transparent; color: var(--color-tertiary); font-size: clamp(0.8rem, 2vw, 0.9rem); }
+        .btn-secondary-ops:hover { background-color: var(--color-tertiary); color: var(--color-background); box-shadow: 0 0 25px rgba(var(--color-tertiary-rgb), 0.7); transform: scale(1.07) translateY(-3px); }
+
+        .section-heading { text-align: center; font-weight: 900; font-size: clamp(2.2rem, 7vw, 3rem); margin-bottom: 0.8rem; letter-spacing: 0.07em; }
+        .section-subheading { text-align: center; font-weight: 700; font-size: clamp(1.3rem, 5vw, 1.7rem); margin-bottom: 3rem; letter-spacing: 0.06em; color: var(--color-primary); }
+        .highlight { /* Use Tailwind */ }
+        .data-slate h4 { color: var(--color-primary); margin-bottom: 1rem; font-weight: 700; font-size: 1.15rem; text-transform: uppercase; border-bottom: 1px solid rgba(var(--color-primary-rgb), 0.6); padding-bottom: 0.5rem; letter-spacing: 0.07em; display: flex; align-items: center; gap: 0.4em; }
+        .data-slate h5 { color: var(--color-tertiary); margin-top: 1.5rem; margin-bottom: 0.7rem; font-weight: 600; font-size: 1.05rem; text-transform: uppercase; letter-spacing: 0.06em; display: flex; align-items: center; gap: 0.4em; }
+        .data-slate ul { list-style: none; padding-left: 0; margin-top: 1rem; }
+        .data-slate ul li { margin-bottom: 0.9rem; padding-left: 2rem; position: relative; font-size: 0.95rem; line-height: 1.6; color: var(--color-text); }
+        .data-slate ul li::before { content: ''; position: absolute; left: 0; top: 0.4em; width: 8px; height: 8px; background-color: var(--color-accent); border-radius: 50%; box-shadow: 0 0 5px var(--color-accent); animation: pulse-bullet 1.5s infinite ease-in-out; }
+        @keyframes pulse-bullet { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(0.7); opacity: 0.6; } }
+        .data-slate ul ul { margin-top: 0.6rem; margin-left: 1rem; }
+        .data-slate ul ul li::before { background-color: var(--color-primary); box-shadow: 0 0 5px var(--color-primary); animation-duration: 1.8s;}
+        .data-slate p { margin-bottom: 1rem; color: var(--color-text); font-size: 0.95rem;}
+        .data-slate strong { color: var(--color-accent); font-weight: 700; }
+        .data-slate em { color: var(--color-secondary); font-style: normal; font-weight: 600;}
+        .data-slate a { color: var(--color-tertiary); text-decoration: none; border-bottom: 1px dashed var(--color-tertiary); transition: all 0.2s; display: inline-flex; align-items: center; gap: 0.25em; }
+        .data-slate a:hover { color: var(--color-accent); border-bottom-color: var(--color-accent); border-bottom-style: solid; text-shadow: 0 0 8px var(--color-accent); }
+        .data-slate code { background-color: rgba(var(--color-text-muted-rgb), 0.3); color: var(--color-primary); padding: 0.2em 0.5em; border-radius: 4px; font-size: 0.85em; font-family: 'Courier New', Courier, monospace; border: 1px solid rgba(var(--color-primary-rgb), 0.4); }
+        .data-slate .slate-graphic { border: 1px solid rgba(var(--color-primary-rgb), 0.3); filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4)); transition: all 0.3s ease; border-radius: 4px; max-width: 100%; height: auto; background: rgba(var(--color-primary-rgb), 0.05); padding: 0.5rem; opacity: 0.8; }
+        .data-slate .slate-graphic:hover { transform: scale(1.05) rotate(-1deg); border-color: rgba(var(--color-primary-rgb), 0.7); filter: drop-shadow(0 5px 8px rgba(var(--color-primary-rgb), 0.4)); opacity: 1; }
+        .img-float-right { float: right; max-width: 140px; margin-left: 1.5rem; margin-bottom: 0.5rem; }
+        .img-float-left { float: left; max-width: 140px; margin-right: 1.5rem; margin-bottom: 0.5rem; }
+        .data-slate::after { content: ""; display: table; clear: both; }
+
+        /* Sidebar Navigation */
+        #sidebar-navigation { position: sticky; top: 100px; align-self: start; padding: 1.5rem; margin-top: 2rem; border-radius: 6px; } /* Renamed ID */
+        #sidebar-navigation .overview-title { font-weight: 900; font-size: 1.1rem; margin-bottom: 1.5rem; text-transform: uppercase; color: var(--color-tertiary); letter-spacing: 0.1em; border-bottom: 1px solid var(--color-tertiary); padding-bottom: 0.5rem; display: flex; align-items: center; gap: 0.4em; }
+        #sidebar-navigation a { display: flex; align-items: center; gap: 0.4em; padding: 0.6rem 0; font-size: 0.75rem; color: var(--color-text-muted); border-left: 3px solid var(--color-text-muted); padding-left: 1.2rem; margin-bottom: 0.6rem; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
+        #sidebar-navigation a:hover { color: var(--color-accent); border-left-color: var(--color-accent); background-color: rgba(var(--color-accent-rgb), 0.1); padding-left: 1.6rem; text-shadow: 0 0 5px var(--color-accent); }
+        #sidebar-navigation .sub-link { padding-left: 2rem; font-size: 0.7rem; opacity: 0.8; border-left-width: 2px; margin-bottom: 0.4rem;}
+        #sidebar-navigation .sub-link:hover { padding-left: 2.4rem; }
+        #sidebar-navigation .nav-section-title { font-weight: 700 !important; color: var(--color-text) !important; margin-top: 1rem; font-size: 0.8rem !important; border-left-color: var(--color-primary) !important; padding-left: 1rem !important; }
+        #sidebar-navigation .nav-section-title:hover { color: var(--color-primary) !important; border-left-color: var(--color-primary) !important; background-color: rgba(var(--color-primary-rgb), 0.1) !important; padding-left: 1.3rem !important; text-shadow: 0 0 5px var(--color-primary); }
+
+        /* Contact Form */
+        #contact-form-section label { display: block; margin-bottom: 0.5rem; text-transform: uppercase; font-size: 0.75rem; color: var(--color-text-muted); letter-spacing: 0.05em; text-align: left; } /* Renamed ID */
+        #contact-form-section input[type="text"], #contact-form-section input[type="email"], #contact-form-section select, #contact-form-section textarea { width: 100%; padding: 0.9rem 1.1rem; border-radius: 4px; background: rgba(0, 5, 15, 0.9); color: var(--color-text); border: 1px solid var(--color-text-muted); transition: all 0.3s; outline: none; font-size: 0.95rem; font-family: var(--font-body); }
+        #contact-form-section input::placeholder, #contact-form-section textarea::placeholder { color: rgba(var(--color-text-muted-rgb), 0.6); font-style: italic; }
+        #contact-form-section input:focus, #contact-form-section select:focus, #contact-form-section textarea:focus { border-color: var(--color-accent); box-shadow: 0 0 15px rgba(var(--color-accent-rgb), 0.6); background: rgba(0, 0, 5, 0.95); }
+        #contact-form-section button { margin-top: 1.5rem; width: 100%; }
+        #form-message-display { margin-top: 1rem; padding: 1rem; border-radius: 4px; font-size: 0.9rem; text-align: center; font-weight: 600; display: none; border: 1px solid transparent; display: flex; align-items: center; justify-content: center; gap: 0.5em; } /* Renamed ID */
+        .form-message-loading { display: flex; background-color: rgba(var(--color-accent-rgb), 0.1); color: var(--color-accent); border-color: var(--color-accent); }
+        .form-message-success { display: flex; background-color: rgba(34, 197, 94, 0.1); color: #22c55e; border-color: #22c55e; }
+        .form-message-error { display: flex; background-color: rgba(239, 68, 68, 0.1); color: #ef4444; border-color: #ef4444; }
+
+        /* Footer */
+        #page-footer { background: #000; border-top: 4px solid var(--color-accent); padding: 3rem 0; margin-top: 4rem; } /* Renamed ID */
+        #page-footer .contact-link { color: var(--color-text-muted); transition: all 0.2s ease; text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.75rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.3em; }
+        #page-footer .contact-link:hover { color: var(--color-accent); text-shadow: 0 0 8px var(--color-accent); }
+        #page-footer .insta-link { color: var(--color-secondary); }
+        #page-footer .insta-link:hover { color: var(--color-accent); text-shadow: 0 0 8px var(--color-accent); }
+
+        .scroll-margin-top { scroll-margin-top: 110px; }
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0; }
+
+        /* Animation: Slide In + Fade (Scroll Triggered) */
+        .animate-on-scroll { opacity: 0; transition: opacity 0.7s ease-out, transform 0.7s cubic-bezier(0.23, 1, 0.32, 1); }
+        .slide-fade-in-left { transform: translateX(-50px) scale(0.95); }
+        .slide-fade-in-right { transform: translateX(50px) scale(0.95); }
+        .scale-up-fade-in { transform: scale(0.9); }
+        .animate-on-scroll.visible { opacity: 1; transform: translateX(0) scale(1); }
+
+        /* Hero Text Animation (Glitchy) */
+        #hero-headline { display: inline-block; position: relative; }
+        .char { display: inline-block; opacity: 0; animation: glitchReveal 1.2s forwards; }
+        @keyframes glitchReveal { 0% { opacity: 0; transform: translateY(15px) skewX(-10deg); text-shadow: 0 0 5px var(--color-secondary); } 20% { opacity: 0.8; transform: translateY(-5px) skewX(5deg); text-shadow: 0 0 10px var(--color-primary); } 40% { opacity: 0.3; transform: translateY(10px) skewX(-8deg); text-shadow: 0 0 8px var(--color-accent); } 60% { opacity: 1; transform: translateY(0) skewX(0); text-shadow: none; } 100% { opacity: 1; transform: translateY(0) skewX(0); } }
+
+        @media (max-width: 1024px) { #sidebar-navigation { display: none; } .content-column { width: 100%; } }
+        @media (max-width: 768px) { .bridge-logo h1 { font-size: 1.3rem; } .nav-link { font-size: 0.7rem; padding: 0.5rem 0.6rem; } #main-bridge .container-command { flex-direction: column; align-items: center; } #main-bridge nav { margin-top: 0.5rem; } .section-heading { font-size: clamp(1.8rem, 8vw, 2.2rem); } .section-subheading { font-size: clamp(1.1rem, 5vw, 1.4rem); } .btn-directive { padding: 0.8rem 1.8rem; font-size: 0.9rem; } .btn-secondary-ops { padding: 0.6rem 1.5rem; font-size: 0.8rem; } .img-float-right, .img-float-left { float: none; max-width: 50%; margin: 1rem auto 1rem auto; display: block; } .data-slate { backdrop-filter: blur(5px) grayscale(0.1); } .hero-section { padding: 10rem 0 8rem 0; } .hero-section h2 { font-size: clamp(2.2rem, 10vw, 3rem); } .hero-section p { font-size: clamp(1rem, 4vw, 1.1rem); } }
+        .icon { display: inline-block; width: 1em; height: 1em; vertical-align: -0.125em; fill: currentColor; }
+        .icon-pulse { animation: pulse-icon 2s infinite ease-in-out; }
+        @keyframes pulse-icon { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+
+        /* Interactive Process Timeline */
+        .process-timeline { position: relative; padding: 1rem 0; }
+        .process-timeline::before { /* The vertical line */ content: ''; position: absolute; top: 0; bottom: 0; left: 1rem; width: 3px; background-color: rgba(var(--color-primary-rgb), 0.3); border-radius: 2px; }
+        .process-step { counter-increment: step-counter; position: relative; padding-left: 3.5rem; /* Increased padding */ margin-bottom: 2.5rem; /* More space */ opacity: 0.6; transition: opacity 0.4s ease; }
+        .process-step.visible { opacity: 1; } /* Highlight when visible */
+        .process-step::before { /* The number circle */ content: counter(step-counter); position: absolute; left: 0; top: 0; width: 2.2rem; height: 2.2rem; background-color: var(--color-primary); color: var(--color-background); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-heading); font-weight: bold; box-shadow: 0 0 12px var(--color-primary); border: 2px solid var(--color-background); transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .process-step.visible::before { transform: scale(1.1); box-shadow: 0 0 18px var(--color-primary); }
+        .process-step h5 { margin-top: 0.1rem; margin-bottom: 0.5rem; color: var(--color-primary); }
+
+        .partner-opp { margin-bottom: 1rem; }
+        .partner-opp strong { color: var(--color-secondary); }
+
+        /* Particle Canvas for Button Clicks */
+        #particle-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; }
+
+    </style>
+</head>
+<body class="antialiased">
+
+<canvas id="galaxy-bg"></canvas>
+<canvas id="particle-canvas"></canvas>
+
+<div class="hud-element hud-top-left">
+    <div class="hud-bracket hud-bracket-tl"></div>
+    STATUS: ONLINE <br> LOCATION: NASHVILLE </div>
+<div class="hud-element hud-top-right">
+    <div class="hud-bracket hud-bracket-tr" style="margin-left: auto;"></div>
+    CONNECTION: STRONG <br> VERSION: HUB V1.0 </div>
+<div class="hud-element hud-bottom-left">
+    <div class="hud-bracket hud-bracket-bl"></div>
+    [PIXEL PLAYGROUNDS]
+</div>
+<div class="hud-element hud-bottom-right">
+     <div class="hud-bracket hud-bracket-br" style="margin-left: auto;"></div>
+    &copy; <span id="current-year-hud"></span> // NASHVILLE CREATOR HUB </div>
+
+
+<div class="content-wrapper">
+
+    <header id="main-bridge">
+        <div class="container-command flex flex-col md:flex-row justify-between items-center">
+            <div class="bridge-logo text-center md:text-left mb-2 md:mb-0">
+                <h1 class="font-black leading-tight glow-primary">Pixel Playgrounds</h1>
+                <p class="text-xs uppercase tracking-widest">// Nashville Creator Hub & Tech //</p> </div>
+            <nav class="flex flex-wrap justify-center items-center space-x-1 md:space-x-2">
+                 <a href="#studio-builds" class="nav-link"><svg class="icon" viewBox="0 0 24 24"><path d="M13.85 22.25h-3.7c-.74 0-1.36-.54-1.45-1.27l-.27-1.89c-.27-.14-.53-.29-.79-.46l-1.8.72c-.7.26-1.47-.09-1.81-.73L2.2 15.13c-.34-.66-.2-1.44.31-1.84l1.53-1.19c-.01-.15-.02-.3-.02-.46 0-.15.01-.31.02-.46L2.51 9.98C2 9.58 1.86 8.81 2.2 8.15l1.81-3.13c.34-.64 1.11-.99 1.81-.73l1.8.72c.26-.17.52-.32.79-.46l.27-1.91c.09-.7.71-1.25 1.45-1.25h3.7c.74 0 1.36.54 1.45 1.27l.27 1.89c.27.14.53.29.79.46l1.8-.72c.7-.26 1.47.09 1.81.73l1.81 3.13c.34.66.2 1.44-.31 1.84l-1.53 1.19c.01.15.02.3.02.46s-.01.31-.02.46l1.53 1.19c.51.4.65 1.18.31 1.84l-1.81 3.13c-.34.64-1.11.99-1.81-.73l-1.8-.72c-.26.17-.52.32-.79-.46l-.27 1.91c-.1.68-.71 1.22-1.45 1.22zm-2.6-8.5c1.93 0 3.5-1.57 3.5-3.5s-1.57-3.5-3.5-3.5-3.5 1.57-3.5 3.5 1.57 3.5 3.5 3.5z"/></svg>Studio Builds</a>
+                <a href="#podcast-gear" class="nav-link"><svg class="icon" viewBox="0 0 24 24"><path d="M9.4 16.6 4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0 4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>Podcast Gear</a>
+                <a href="#our-process" class="nav-link"><svg class="icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>Our Process</a>
+                <a href="#creator-connect" class="nav-link"><svg class="icon" viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>Creator Connect</a> <a href="#resource-databank" class="nav-link"><svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>Resources</a> <a href="#contact-us" class="nav-link"><svg class="icon" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg>Contact</a>
+                <a href="https://www.instagram.com/pixelplaygroundsnashville/" target="_blank" rel="noopener noreferrer" class="nav-link insta-link" aria-label="Instagram"><svg class="icon" viewBox="0 0 24 24"><path d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2m-.2 2A3.6 3.6 0 0 0 4 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6C20 5.61 18.39 4 16.4 4H7.6m9.65 1.5a1.25 1.25 0 0 1 1.25 1.25A1.25 1.25 0 0 1 17.25 8 1.25 1.25 0 0 1 16 6.75a1.25 1.25 0 0 1 1.25-1.25M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3z"/></svg>Instagram</a> <a href="tel:+16156064969" class="nav-link direct-call-link" aria-label="Call"><svg class="icon" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>Direct Call</a> </nav>
+        </div>
+    </header>
+
+    <section class="hero-section py-28 md:py-40 text-center relative overflow-hidden flex items-center justify-center">
+        <div class="container-command relative z-10 px-4 md:px-6">
+            <h2 id="hero-headline" class="text-4xl md:text-5xl lg:text-6xl font-black mb-5 uppercase glow-tertiary tracking-wider" data-text="Build Your Elite Studio"> Build Your Elite Studio </h2>
+            <p class="mt-4 max-w-3xl mx-auto text-lg md:text-xl text-gray-300 mb-12 leading-relaxed animate-on-scroll scale-up-fade-in" style="transition-delay: 0.8s;">
+                Pixel Playgrounds is Nashville's hub for creators, offering <strong class="text-secondary glow-secondary">elite podcast studio installations, strategic tech consultation, community connections, and resources</strong>. Turnkey solutions for professional results. </p>
+            <div class="space-y-6 animate-on-scroll scale-up-fade-in" style="transition-delay: 1s;">
+                <a href="#contact-us" class="btn btn-directive inline-block text-lg warning-border"> <svg class="icon" viewBox="0 0 24 24"><path d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>
+                    Access FREE Consultation
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>
+                </a>
+                <p class="text-sm text-accent">// Direct Contact Channels Open //</p> <div class="flex flex-wrap justify-center items-center gap-x-6 gap-y-3">
+                    <a href="tel:+16156064969" class="font-bold text-lg text-accent hover:text-secondary glow-accent hover:underline flex items-center gap-1" aria-label="Call"><svg class="icon" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>(615) 606-4969</a>
+                     <span class="text-gray-600 hidden md:inline"> // </span>
+                     <a href="https://www.instagram.com/pixelplaygroundsnashville/" target="_blank" rel="noopener noreferrer" class="font-bold text-lg text-accent hover:text-secondary insta-link glow-accent hover:underline flex items-center gap-1" aria-label="Instagram"><svg class="icon" viewBox="0 0 24 24"><path d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2m-.2 2A3.6 3.6 0 0 0 4 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6C20 5.61 18.39 4 16.4 4H7.6m9.65 1.5a1.25 1.25 0 0 1 1.25 1.25A1.25 1.25 0 0 1 17.25 8 1.25 1.25 0 0 1 16 6.75a1.25 1.25 0 0 1 1.25-1.25M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3z"/></svg>IG: @pixelplaygroundsnashville</a>
+                 </div>
+            </div>
+        </div>
+    </section>
+
+    <main class="container-command py-12 md:py-16">
+        <div class="flex flex-col lg:flex-row gap-8 md:gap-12">
+
+            <aside class="w-full lg:w-1/4 xl:w-1/5">
+                 <div id="sidebar-navigation" class="data-slate !sticky top-[100px] animate-on-scroll slide-fade-in-left"> <h4 class="overview-title glow-tertiary"><svg class="icon" viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>// Site Navigation //</h4> <a href="#studio-builds" class="nav-section-title"><svg class="icon" viewBox="0 0 24 24"><path d="M13.85 22.25h-3.7c-.74 0-1.36-.54-1.45-1.27l-.27-1.89c-.27-.14-.53-.29-.79-.46l-1.8.72c-.7.26-1.47-.09-1.81-.73L2.2 15.13c-.34-.66-.2-1.44.31-1.84l1.53-1.19c-.01-.15-.02-.3-.02-.46 0-.15.01-.31.02-.46L2.51 9.98C2 9.58 1.86 8.81 2.2 8.15l1.81-3.13c.34-.64 1.11-.99 1.81-.73l1.8.72c.26-.17.52-.32.79-.46l.27-1.91c.09-.7.71-1.25 1.45-1.25h3.7c.74 0 1.36.54 1.45 1.27l.27 1.89c.27.14.53.29.79-.46l1.8-.72c.7-.26 1.47.09 1.81.73l1.81 3.13c.34.66.2 1.44-.31 1.84l-1.53 1.19c.01.15.02.3.02.46s-.01.31-.02.46l1.53 1.19c.51.4.65 1.18.31 1.84l-1.81 3.13c-.34.64-1.11-.99-1.81-.73l-1.8-.72c-.26.17-.52.32-.79-.46l-.27 1.91c-.1.68-.71 1.22-1.45 1.22zm-2.6-8.5c1.93 0 3.5-1.57 3.5-3.5s-1.57-3.5-3.5-3.5-3.5 1.57-3.5 3.5 1.57 3.5 3.5 3.5z"/></svg>Studio Builds</a>
+                     <a href="#installation-focus" class="sub-link"><svg class="icon" viewBox="0 0 24 24"><path d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>Core Service</a>
+                     <a href="#consultation-design" class="sub-link"><svg class="icon" viewBox="0 0 24 24"><path d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>Consult & Design</a>
+
+                    <a href="#podcast-gear" class="nav-section-title"><svg class="icon" viewBox="0 0 24 24"><path d="M9.4 16.6 4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0 4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>Podcast Gear</a>
+                    <a href="#podcast-mics" class="sub-link"><svg class="icon" viewBox="0 0 24 24"><path d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>Microphones</a>
+                    <a href="#podcast-interfaces" class="sub-link"><svg class="icon" viewBox="0 0 24 24"><path d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>Interfaces & Mixers</a>
+                    <a href="#podcast-acoustics" class="sub-link"><svg class="icon" viewBox="0 0 24 24"><path d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>Acoustics</a>
+                    <a href="#podcast-software" class="sub-link"><svg class="icon" viewBox="0 0 24 24"><path d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>Software & Extras</a>
+
+                    <a href="#our-process" class="nav-section-title"><svg class="icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>Our Process</a>
+                    <a href="#process-step-1" class="sub-link"><svg class="icon" viewBox="0 0 24 24"><path d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>Step 1: Connect</a>
+                    <a href="#process-step-2" class="sub-link"><svg class="icon" viewBox="0 0 24 24"><path d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>Step 2: Design</a>
+                    <a href="#process-step-3" class="sub-link"><svg class="icon" viewBox="0 0 24 24"><path d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>Step 3: Build</a>
+                    <a href="#process-step-4" class="sub-link"><svg class="icon" viewBox="0 0 24 24"><path d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>Step 4: Launch</a>
+
+                    <a href="#creator-connect" class="nav-section-title"><svg class="icon" viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>Creator Connect</a>
+                    <a href="#local-events" class="sub-link"><svg class="icon" viewBox="0 0 24 24"><path d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>Events & Workshops</a>
+                    <a href="#creator-spotlight" class="sub-link"><svg class="icon" viewBox="0 0 24 24"><path d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>Creator Spotlight</a>
+                    <a href="#collaboration-board" class="sub-link"><svg class="icon" viewBox="0 0 24 24"><path d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>Collaborations</a>
+
+                    <a href="#resource-databank" class="nav-section-title"><svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>Resources</a>
+                     <a href="#quick-guides" class="sub-link"><svg class="icon" viewBox="0 0 24 24"><path d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>Quick Guides</a>
+                     <a href="#nashville-links" class="sub-link"><svg class="icon" viewBox="0 0 24 24"><path d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>Nashville Links</a>
+
+                    <a href="#contact-us" class="nav-section-title"><svg class="icon" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg>Contact Us</a>
+                    <a href="#consultation-form" class="sub-link"><svg class="icon" viewBox="0 0 24 24"><path d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>Request Form</a>
+                    <a href="#direct-contact" class="sub-link"><svg class="icon" viewBox="0 0 24 24"><path d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>Direct Lines</a>
+                </div>
+            </aside>
+
+            <div class="w-full lg:w-3/4 xl:w-4/5 content-column">
+
+                 <section id="studio-builds" class="scroll-margin-top">
+                    <h2 class="section-heading glitch-heading" data-text="Podcast Studio Builds">Podcast Studio Builds</h2>
+                    <h3 class="section-subheading glow-primary">// Professional Installation & Consultation //</h3>
+
+                    <div id="installation-focus" class="data-slate animate-on-scroll scale-up-fade-in scroll-margin-top">
+                        <h4><svg class="icon" viewBox="0 0 24 24"><path d="m12 15.4 3.77 2.27-.92-4.33 3.4-2.95-4.46-.38L12 6.16 10.21 10l-4.46.38 3.4 2.95-.92 4.33z"/></svg>Core Service: Turnkey Studio Setup</h4>
+                        <img src="https://placehold.co/300x200/010409/0cb7e2?text=Studio+Install&font=orbitron" alt="Podcast studio setup example" class="slate-graphic img-float-right">
+                        <p>Stop wrestling with tech and start creating. Pixel Playgrounds specializes in <strong>designing and installing complete podcast studios</strong> tailored to your specific needs and space in Nashville.</p>
+                        <p>From selecting the right microphones and mixers to optimizing acoustics and configuring software, we provide end-to-end solutions. Our goal is a <code class="font-bold">hassle-free, professional setup</code> so you can focus on your content.</p>
+                        <ul>
+                            <li>Custom design based on your goals and budget.</li>
+                            <li>Hardware procurement and expert installation.</li>
+                            <li>Acoustic treatment planning and implementation.</li>
+                            <li>Cabling, configuration, and testing.</li>
+                            <li>Basic walkthrough and operational guidance.</li>
+                        </ul>
+                    </div>
+
+                     <div id="consultation-design" class="data-slate animate-on-scroll scale-up-fade-in scroll-margin-top">
+                        <h4><svg class="icon" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>Strategic Consultation & Design</h4>
+                        <p>Not sure where to start? Need to upgrade an existing setup? Our <strong>strategic tech consultation</strong> helps you navigate the complexities of audio and video gear.</p>
+                        <p>We analyze your creative goals, budget, and technical requirements to recommend the <em>optimal equipment and setup strategy</em>. Get expert advice before you invest.</p>
+                        <ul>
+                            <li>Needs assessment and goal definition.</li>
+                            <li>Personalized equipment recommendations.</li>
+                            <li>Acoustic analysis and treatment strategies.</li>
+                            <li>Workflow optimization planning.</li>
+                            <li>Future-proofing your setup.</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <section id="podcast-gear" class="scroll-margin-top pt-12">
+                    <h2 class="section-heading glitch-heading" data-text="Podcast Gear Intel">Podcast Gear Intel</h2>
+                    <h3 class="section-subheading glow-primary">// Key Components Demystified //</h3>
+
+                    <div id="podcast-mics" class="data-slate animate-on-scroll slide-fade-in-right scroll-margin-top">
+                        <h4><svg class="icon" viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.49 6-3.31 6-6.72h-1.7z"/></svg>Microphones: Your Voice's Gateway</h4>
+                         <p>The microphone is crucial. We help select the right type (Dynamic vs. Condenser) and model (e.g., <code>Shure SM7B</code>, <code>Rode Procaster</code>, <code>Electro-Voice RE20</code>) based on your voice, room, and budget. Understanding polar patterns (Cardioid, Hypercardioid) is key for minimizing unwanted noise.</p>
+                        <ul>
+                            <li><strong>Dynamic Mics:</strong> Great for untreated rooms, reject background noise well (e.g., SM7B, PodMic).</li>
+                            <li><strong>Condenser Mics:</strong> Capture more detail and nuance, often require phantom power and a quieter room (e.g., Rode NT1, AT2020).</li>
+                            <li>Considerations: Pop filter, shock mount, quality cables (XLR).</li>
+                        </ul>
+                    </div>
+
+                    <div id="podcast-interfaces" class="data-slate animate-on-scroll slide-fade-in-right scroll-margin-top">
+                        <h4><svg class="icon" viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2zm-8.9-5h7.45c.75 0 1.41-.41 1.75-1.03L21 4.96 19.25 4l-3.7 7H8.53L4.27 2H1v2h2l3.6 7.59L5.25 14.03c-.16.28-.25.61-.25.97 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63zM12 2l-2.1 4.9L5 7.5l3.6 3.4L7.7 16 12 13.6 16.3 16l-.9-5.1L19 7.5l-4.9-.6L12 2z"/></svg>Interfaces & Mixers: Command Central</h4>
+                        <p>An audio interface (like <code>Focusrite Scarlett</code> series, <code>Universal Audio Apollo</code>) connects your XLR microphone to your computer, providing phantom power and preamplification. Mixers (like <code>Rodecaster Pro II</code>, <code>Zoom PodTrak P4</code>) offer more inputs, onboard processing, and tactile controls, often allowing direct recording to SD cards.</p>
+                        <ul>
+                            <li><strong>Interfaces:</strong> Essential for connecting pro mics to computers. Number of inputs matters.</li>
+                            <li><strong>Mixers/Podcast Consoles:</strong> Offer more control, sound pads, multi-track recording, often simplifying the workflow.</li>
+                            <li>Key Specs: Preamp quality (gain, noise floor), number of inputs/outputs, connectivity (USB-C, Thunderbolt).</li>
+                        </ul>
+                    </div>
+
+                    <div id="podcast-acoustics" class="data-slate animate-on-scroll slide-fade-in-right scroll-margin-top">
+                        <h4><svg class="icon" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>Acoustic Treatment: Taming the Room</h4>
+                        <img src="https://placehold.co/200x150/010409/0cb7e2?text=Acoustic+Panels&font=orbitron" alt="Acoustic panels on a wall" class="slate-graphic img-float-left">
+                        <p>Even the best gear sounds bad in a room full of echo (reverberation) and reflections. <strong>Acoustic treatment is non-negotiable for professional sound.</strong></p>
+                        <p>We focus on absorbing reflections at key points (first reflection points) and controlling low-frequency buildup (bass traps).</p>
+                        <ul>
+                            <li><strong>Absorption Panels:</strong> Reduce echo and flutter (e.g., foam panels, mineral wool panels). Placement matters.</li>
+                            <li><strong>Bass Traps:</strong> Address boomy low frequencies, often placed in corners.</li>
+                            <li><strong>Diffusion:</strong> Scatters sound waves to create a more natural ambiance (less common for basic voice studios).</li>
+                            <li>Even simple solutions like heavy blankets or furniture placement can help initially.</li>
+                        </ul>
+                    </div>
+
+                     <div id="podcast-software" class="data-slate animate-on-scroll slide-fade-in-right scroll-margin-top">
+                         <h4><svg class="icon" viewBox="0 0 24 24"><path d="M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5C13 2.12 11.88 1 10.5 1S8 2.12 8 3.5V5H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h4v-1.5c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5V19h4c1.1 0 2-.9 2-2v-4h1.5c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5zm-7 0H10V9h3.5v2zm-5 0H5V9h3.5v2z"/></svg>Software, Headphones & Extras</h4>
+                        <p>Your Digital Audio Workstation (DAW) is where you record and edit (e.g., <code>Audacity</code> (Free), <code>Reaper</code>, <code>Adobe Audition</code>, <code>Logic Pro</code>, <code>Descript</code>). Good closed-back headphones are essential for monitoring without bleed (e.g., <code>Beyerdynamic DT 770 Pro</code>, <code>Audio-Technica ATH-M50x</code>).</p>
+                        <ul>
+                            <li><strong>DAW Choice:</strong> Depends on budget, OS, and feature needs.</li>
+                            <li><strong>Headphones:</strong> Closed-back for recording, potentially open-back for mixing.</li>
+                            <li><strong>Mic Stands:</strong> Desk boom arms (e.g., Rode PSA1) or floor stands.</li>
+                            <li><strong>Video Gear (Optional):</strong> Cameras (DSLR, Mirrorless, Webcam), lighting (Key, Fill, Backlight), capture cards.</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <section id="our-process" class="scroll-margin-top pt-12">
+                    <h2 class="section-heading glitch-heading" data-text="Our Process">Our Process</h2>
+                    <h3 class="section-subheading glow-primary">// From Concept to Creation //</h3>
+
+                    <div class="data-slate animate-on-scroll scale-up-fade-in process-timeline">
+                        <h4><svg class="icon" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-4 8H9v2h6v-2z"/></svg>The Studio Build Protocol</h4>
+                        <p>We follow a structured process to ensure your studio build is efficient and meets your expectations.</p>
+
+                        <div id="process-step-1" class="process-step scroll-margin-top animate-on-scroll scale-up-fade-in">
+                            <h5><span class="sr-only">Step 1: </span>Connect & Consult</h5>
+                            <p>Reach out via the form below or call us. We'll schedule a <strong>free initial consultation</strong> to discuss your vision, goals, budget, and existing space. We listen first.</p>
+                        </div>
+                        <div id="process-step-2" class="process-step scroll-margin-top animate-on-scroll scale-up-fade-in">
+                            <h5><span class="sr-only">Step 2: </span>Design & Propose</h5>
+                            <p>Based on our consultation, we design a <code class="font-bold">custom studio plan</code>. This includes specific equipment recommendations, acoustic strategy, layout, and a detailed quote. We refine this with your feedback.</p>
+                        </div>
+                        <div id="process-step-3" class="process-step scroll-margin-top animate-on-scroll scale-up-fade-in">
+                            <h5><span class="sr-only">Step 3: </span>Procure & Build</h5>
+                            <p>Once approved, we procure all necessary hardware. Our technicians then perform the <strong>expert installation</strong>, handling cabling, mounting, acoustic treatment placement, and initial setup.</p>
+                        </div>
+                        <div id="process-step-4" class="process-step scroll-margin-top animate-on-scroll scale-up-fade-in">
+                            <h5><span class="sr-only">Step 4: </span>Test, Train & Launch</h5>
+                            <p>We rigorously test every component. We provide a basic operational walkthrough, ensuring you're comfortable with your new setup. <em>Then, you're ready to create!</em> Ongoing support options are available.</p>
+                        </div>
+                    </div>
+                 </section>
+
+                 <section id="creator-connect" class="scroll-margin-top pt-12">
+                    <h2 class="section-heading glitch-heading" data-text="Nashville Creator Connect">Nashville Creator Connect</h2>
+                    <h3 class="section-subheading glow-primary">// Community. Collaboration. Events. //</h3>
+
+                    <div id="local-events" class="data-slate animate-on-scroll scale-up-fade-in scroll-margin-top">
+                        <h4><svg class="icon" viewBox="0 0 24 24"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg>Local Events & Workshops</h4>
+                        <p>Stay plugged into the Nashville creator scene. Find listings for relevant meetups, workshops, panels, and networking opportunities.</p>
+                        <ul>
+                            <li><strong>Upcoming Event:</strong> Nashville Podcasters Meetup - April 15th, 2025 @ Cafe Intermezzo - <a href="#" target="_blank" rel="noopener">Details</a></li>
+                            <li><strong>Workshop:</strong> Audio Editing Basics with Reaper - April 22nd, 2025 (Online) - <a href="#" target="_blank" rel="noopener">Sign Up</a></li>
+                            <li><em>Have an event to share? <a href="#contact-us">Let us know!</a></em></li>
+                        </ul>
+                    </div>
+
+                    <div id="creator-spotlight" class="data-slate animate-on-scroll scale-up-fade-in scroll-margin-top">
+                        <h4><svg class="icon" viewBox="0 0 24 24"><path d="M9.5 15.5c1.38 0 2.5-1.12 2.5-2.5s-1.12-2.5-2.5-2.5-2.5 1.12-2.5 2.5 1.12 2.5 2.5 2.5zM19 12c-1.38 0-2.5 1.12-2.5 2.5s1.12 2.5 2.5 2.5 2.5-1.12 2.5-2.5-1.12-2.5-2.5-2.5zm-9.5 7c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5c0-4.97-4.03-9-9-9z"/></svg>Creator Spotlight: [Featured Creator Name]</h4>
+                         <img src="https://placehold.co/150x150/010409/fa0af0?text=Creator&font=orbitron" alt="Featured Nashville Creator" class="slate-graphic img-float-left">
+                        <p>This month, we're highlighting <strong>[Featured Creator Name]</strong>, host of the <em>"[Podcast/Show Title]"</em> podcast. Learn about their journey, their setup (maybe built by us!), and advice for fellow creators.</p>
+                        <p><em>"Pixel Playgrounds helped streamline our recording process..."</em> <a href="#" target="_blank" rel="noopener">Read the full feature & listen here.</a></p>
+                        <p>Want to be featured? <a href="#contact-us">Get in touch!</a></p>
+                    </div>
+
+                    <div id="collaboration-board" class="data-slate animate-on-scroll scale-up-fade-in scroll-margin-top">
+                        <h4><svg class="icon" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/></svg>Collaboration & Opportunities Board</h4>
+                        <p>Looking for a guest, a co-host, an editor, or background music for your Nashville-based project? Post your needs or find opportunities here.</p>
+                        <ul>
+                            <li><strong>Seeking:</strong> Co-host for local history podcast - <a href="#">Contact [Name]</a></li>
+                            <li><strong>Offering:</strong> Podcast editing services (Nashville based) - <a href="#">View Portfolio</a></li>
+                            <li><em>(Board functionality coming soon. Submit postings via <a href="#contact-us">contact form</a> for now.)</em></li>
+                        </ul>
+                    </div>
+                </section>
+
+                <section id="resource-databank" class="scroll-margin-top pt-12">
+                    <h2 class="section-heading glitch-heading" data-text="Resource Databank">Resource Databank</h2>
+                    <h3 class="section-subheading glow-primary">// Guides, Tools & Local Links //</h3>
+
+                    <div id="quick-guides" class="data-slate animate-on-scroll scale-up-fade-in scroll-margin-top">
+                         <h4><svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>Podcasting Quick Guides</h4>
+                        <p>Curated links to essential guides and tutorials for leveling up your podcast game.</p>
+                        <ul>
+                            <li><a href="#" target="_blank" rel="noopener">Choosing Your Podcast Format</a></li>
+                            <li><a href="#" target="_blank" rel="noopener">Microphone Techniques for Clear Audio</a></li>
+                            <li><a href="#" target="_blank" rel="noopener">Introduction to Audio Editing Concepts</a></li>
+                            <li><a href="#" target="_blank" rel="noopener">Podcast Marketing & Growth Strategies</a></li>
+                            <li><a href="#" target="_blank" rel="noopener">Understanding RSS Feeds and Distribution</a></li>
+                        </ul>
+                    </div>
+
+                    <div id="nashville-links" class="data-slate animate-on-scroll scale-up-fade-in scroll-margin-top">
+                        <h4><svg class="icon" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>Nashville Creator Resources</h4>
+                        <p>Useful links for creators operating in the Nashville area.</p>
+                        <ul>
+                            <li><a href="#" target="_blank" rel="noopener">Nashville Entrepreneur Center</a></li>
+                            <li><a href="#" target="_blank" rel="noopener">Arts & Business Council of Greater Nashville</a></li>
+                            <li><a href="#" target="_blank" rel="noopener">Local Recording Studios for Rent (List)</a></li>
+                            <li><a href="#" target="_blank" rel="noopener">Nashville Film Festival (Relevant Workshops?)</a></li>
+                            <li><em>Know a great local resource? <a href="#contact-us">Share it!</a></em></li>
+                        </ul>
+                    </div>
+                 </section>
+
+                 <section id="contact-us" class="scroll-margin-top pt-12">
+                    <h2 class="section-heading glitch-heading" data-text="Contact Us">Contact Us</h2>
+                    <h3 class="section-subheading glow-primary">// Open Communication Channels //</h3>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+                         <div id="consultation-form" class="data-slate animate-on-scroll slide-fade-in-left scroll-margin-top">
+                            <h4><svg class="icon" viewBox="0 0 24 24"><path d="M22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6zm-2 0-8 5-8-5h16zm0 12H4V8l8 5 8-5v10z"/></svg>Request Free Consultation</h4>
+                            <p>Ready to discuss your project? Fill out the form below to request your free, no-obligation consultation.</p>
+                            <form id="contact-form-section"> <div class="mb-4">
+                                    <label for="name">Name</label>
+                                    <input type="text" id="name" name="name" placeholder="Enter Your Name" required>
+                                </div>
+                                <div class="mb-4">
+                                    <label for="email">Email</label>
+                                    <input type="email" id="email" name="email" placeholder="your.email@domain.com" required>
+                                </div>
+                                <div class="mb-4">
+                                    <label for="service">Service Interest</label>
+                                    <select id="service" name="service">
+                                        <option value="consultation">General Consultation</option>
+                                        <option value="installation">Full Studio Installation</option>
+                                        <option value="upgrade">Existing Setup Upgrade</option>
+                                        <option value="acoustics">Acoustic Treatment</option>
+                                        <option value="other">Other / Not Sure</option>
+                                    </select>
+                                </div>
+                                <div class="mb-4">
+                                    <label for="message">Project Details / Questions</label>
+                                    <textarea id="message" name="message" rows="4" placeholder="Tell us about your podcast or project goals..." required></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-directive w-full">
+                                    <svg class="icon" viewBox="0 0 24 24"><path d="M2.01 21 23 12 2.01 3 2 10l15 2-15 2z"/></svg> Send Transmission
+                                </button>
+                                <div id="form-message-display"></div> </form>
+                        </div>
+
+                        <div id="direct-contact" class="data-slate animate-on-scroll slide-fade-in-right scroll-margin-top">
+                            <h4><svg class="icon" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>Direct Lines</h4>
+                            <p>Prefer to talk directly? Reach out through these channels:</p>
+                            <ul>
+                                <li><strong>Phone:</strong> <a href="tel:+16156064969">(615) 606-4969</a></li>
+                                <li><strong>Email:</strong> <a href="mailto:connect@pixelplaygroundsnashville.com">connect@pixelplaygroundsnashville.com</a> (Example Email)</li>
+                                <li><strong>Instagram DM:</strong> <a href="https://www.instagram.com/pixelplaygroundsnashville/" target="_blank" rel="noopener noreferrer" class="insta-link">@pixelplaygroundsnashville</a></li>
+                            </ul>
+                            <h5><svg class="icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 16.5c-3.58 0-6.5-2.92-6.5-6.5s2.92-6.5 6.5-6.5 6.5 2.92 6.5 6.5-2.92 6.5-6.5 6.5zM11 8h2v6h-2zm0 8h2v2h-2z"/></svg>Business Hours</h5>
+                            <p>Consultations typically scheduled Monday - Friday, 9 AM - 5 PM CT. Installation times vary based on project scope.</p>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </div>
+    </main>
+
+    <footer id="page-footer"> <div class="container-command text-center text-sm">
+            <div class="mb-4">
+                <a href="tel:+16156064969" class="contact-link mx-3"><svg class="icon" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>(615) 606-4969</a>
+                <a href="https://www.instagram.com/pixelplaygroundsnashville/" target="_blank" rel="noopener noreferrer" class="contact-link insta-link mx-3"><svg class="icon" viewBox="0 0 24 24"><path d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2m-.2 2A3.6 3.6 0 0 0 4 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6C20 5.61 18.39 4 16.4 4H7.6m9.65 1.5a1.25 1.25 0 0 1 1.25 1.25A1.25 1.25 0 0 1 17.25 8 1.25 1.25 0 0 1 16 6.75a1.25 1.25 0 0 1 1.25-1.25M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3z"/></svg>@pixelplaygroundsnashville</a>
+                <a href="mailto:connect@pixelplaygroundsnashville.com" class="contact-link mx-3"><svg class="icon" viewBox="0 0 24 24"><path d="M22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6zm-2 0-8 5-8-5h16zm0 12H4V8l8 5 8-5v10z"/></svg>Email Us</a> </div>
+            <p class="text-xs text-gray-600">&copy; <span id="current-year-footer"></span> Pixel Playgrounds Nashville. Your Hub for Creator Tech.</p> </div>
+    </footer>
+
+</div><script>
+    // Simple Galaxy Background (THREE.js)
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('galaxy-bg'), alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+
+    const starsGeometry = new THREE.BufferGeometry();
+    const starsMaterial = new THREE.PointsMaterial({ color: 0x6a7c8c, size: 0.008, transparent: true, opacity: 0.6 }); // Muted stars
+    const starVertices = [];
+    for (let i = 0; i < 15000; i++) { // Increased star count
+        const x = (Math.random() - 0.5) * 20; // Smaller spread initially
+        const y = (Math.random() - 0.5) * 20;
+        const z = (Math.random() - 0.5) * 30; // Further depth
+        starVertices.push(x, y, z);
+    }
+    starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));
+    const stars = new THREE.Points(starsGeometry, starsMaterial);
+    scene.add(stars);
+
+    camera.position.z = 1.5; // Closer camera
+
+    function animateGalaxy() {
+        requestAnimationFrame(animateGalaxy);
+        stars.rotation.y += 0.00008; // Slower rotation
+        stars.rotation.x += 0.00005;
+        renderer.render(scene, camera);
+    }
+    animateGalaxy();
+
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // Scroll Animations
+    const scrollElements = document.querySelectorAll('.animate-on-scroll');
+    const processSteps = document.querySelectorAll('.process-step'); // For process timeline visibility
+
+    const elementInView = (el, dividend = 1) => {
+      const elementTop = el.getBoundingClientRect().top;
+      return (
+        elementTop <= (window.innerHeight || document.documentElement.clientHeight) / dividend
+      );
+    };
+
+    const displayScrollElement = (element) => {
+      element.classList.add('visible');
+    };
+
+    const handleScrollAnimation = () => {
+      scrollElements.forEach((el) => {
+        if (elementInView(el, 1.15)) { // Trigger slightly sooner
+          displayScrollElement(el);
+        }
+      });
+      // Specific handling for process steps to add 'visible' class
+      processSteps.forEach((step) => {
+          if (elementInView(step, 1.1)) { // Adjust trigger point if needed
+              step.classList.add('visible');
+          } else {
+              step.classList.remove('visible'); // Optional: Remove if you want it to fade out when scrolled past
+          }
+      });
+    }
+
+    window.addEventListener('scroll', () => {
+      handleScrollAnimation();
+    });
+    // Initial check in case elements are already in view
+    handleScrollAnimation();
+
+
+    // Set Current Year in HUD and Footer
+    const currentYear = new Date().getFullYear();
+    document.getElementById('current-year-hud').textContent = currentYear;
+    document.getElementById('current-year-footer').textContent = currentYear;
+
+
+    // Hero Headline Character Animation
+    const headline = document.getElementById('hero-headline');
+    if (headline) {
+        const text = headline.textContent.trim();
+        headline.textContent = ''; // Clear original text
+        text.split('').forEach((char, index) => {
+            const span = document.createElement('span');
+            span.className = 'char';
+            span.textContent = char === ' ' ? '\u00A0' : char; // Handle spaces
+            span.style.animationDelay = `${index * 0.03 + 0.5}s`; // Staggered delay, starts after 0.5s
+            headline.appendChild(span);
+        });
+    }
+
+
+    // Simple Form Submission Handler (Example - Netlify/Formspree friendly)
+    const form = document.getElementById('contact-form-section');
+    const formMessage = document.getElementById('form-message-display');
+
+    if (form) {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            formMessage.textContent = 'Sending...';
+            formMessage.className = 'form-message-loading'; // Show loading
+            formMessage.style.display = 'flex';
+
+
+            const formData = new FormData(form);
+            const object = {};
+            formData.forEach((value, key) => object[key] = value);
+            const json = JSON.stringify(object);
+
+            try {
+                // Replace with your actual form endpoint (Netlify, Formspree, etc.)
+                const response = await fetch(form.action || window.location.pathname, { // Use form action or current path for Netlify
+                    method: 'POST',
+                    headers: {
+                       'Content-Type': 'application/json',
+                       'Accept': 'application/json' // Important for Formspree
+                    },
+                    body: json // Send JSON for Formspree, FormData might be needed for others/Netlify default
+                    // For Netlify default forms, you might need to skip JS fetch
+                    // and rely on standard HTML form submission with Netlify attributes.
+                    // Or use FormData: body: formData
+                });
+
+                if (response.ok) {
+                    formMessage.textContent = 'Transmission Received! We\'ll be in touch soon.';
+                    formMessage.className = 'form-message-success';
+                    form.reset(); // Clear form
+                } else {
+                    const errorData = await response.json().catch(() => ({})); // Try to get error details
+                    formMessage.textContent = `Error: ${errorData.error || 'Could not send message. Please try direct contact.'}`;
+                    formMessage.className = 'form-message-error';
+                }
+            } catch (error) {
+                console.error('Form submission error:', error);
+                formMessage.textContent = 'Network Error: Could not send message. Please try direct contact.';
+                formMessage.className = 'form-message-error';
+            } finally {
+               // Keep message displayed
+            }
+        });
+    }
+
+    // --- Placeholder for Particle Click Effect (Requires more complex setup) ---
+    // const particleCanvas = document.getElementById('particle-canvas');
+    // if (particleCanvas) {
+    //    // Add event listeners to buttons
+    //    document.querySelectorAll('.btn').forEach(button => {
+    //        button.addEventListener('click', (event) => {
+    //             // Trigger particle burst at event.clientX, event.clientY
+    //             console.log('Button clicked, trigger particles at:', event.clientX, event.clientY);
+    //             // createParticles(event.clientX, event.clientY); // Example function call
+    //        });
+    //    });
+    //
+    //    function createParticles(x, y) {
+    //        // Logic to create and animate particles on the particleCanvas
+    //        // This would involve setting up a context, drawing shapes, and animating them
+    //        console.log(`Creating particles at ${x}, ${y}`);
+    //    }
+    // }
+
+
+    // --- Basic Tone.js click sound (Optional - uncomment Tone.js script tag in head) ---
+    // document.querySelectorAll('a, button').forEach(el => {
+    //   el.addEventListener('click', () => {
+    //     try {
+    //       const synth = new Tone.Synth({
+    //         oscillator: { type: 'sine' },
+    //         envelope: { attack: 0.005, decay: 0.1, sustain: 0.01, release: 0.05 }
+    //       }).toDestination();
+    //       synth.triggerAttackRelease('C4', '8n', Tone.now()); // Low click
+    //
+    //       // Add a subtle noise element for a more digital feel
+    //        const noise = new Tone.NoiseSynth({
+    //            noise: { type: 'white' },
+    //            envelope: { attack: 0.001, decay: 0.05, sustain: 0 }
+    //        }).toDestination();
+    //        noise.triggerAttackRelease('32n', Tone.now() + 0.01);
+    //
+    //     } catch (e) {
+    //       console.warn("Tone.js error - sounds disabled. Ensure library is loaded.", e);
+    //     }
+    //   });
+    // });
+
+
+</script>
+
+</body>
+</html>
+
+<!-- Sources: -->
+<!-- 1. https://eitca.org/web-development/eitc-wd-wff-webflow-fundamentals/layout/position/examination-review-position/how-does-sticky-positioning-combine-aspects-of-both-static-and-fixed-positioning-and-what-are-some-practical-use-cases-for-sticky-positioning-in-web-design/ -->
+<!-- 2. https://github.com/albanbleicher/portfolio-front -->
+<!-- 3. https://github.com/fizzstudio/EXPERt -->
+<!-- 4. https://github.com/AbdallahMaf/MAFConcept -->
+<!-- 5. https://github.com/Cristal-Herrera/Portafolio-Personal -->
+<!-- 6. https://github.com/Metrevelii/FinalProject -->
+<!-- 7. https://ithelp.ithome.com.tw/articles/10348206?sc=rss.qu -->
+<!-- 8. https://github.com/xu4wang/icon-library -->
+<!-- 9. https://www.yicaiai.com/news/article/66b770374ddd79f11a0a4b8a -->
+<!-- 10. https://compositecomputer.club/blog/ -->
+<!-- 11. https://github.com/ArthurClemens/polythene -->
+<!-- 12. https://github.com/google/skia-buildbot -->
+<!-- 13. https://github.com/Darkobligations/NielsenHomeImprovements -->
+<!-- 14. https://web.dev/patterns/components/settings/ -->
+<!-- 15. https://custom-web-component.net/examples-components-material-icon-general.html -->
+<!-- 16. https://github.com/Justasrimavicius/cointrace -->
+<!-- 17. https://codepen.io/twinsin/pen/yYEKmR -->
+<!-- 18. https://github.com/dog-project/DogProject -->
+<!-- 19. http://rubyonrailsissue.blogspot.com/2016_06_01_archive.html -->
+<!-- 20. https://github.com/patrickwebsdev/portafolio -->
+<!-- 21. https://discourse.threejs.org/t/instancedmesh-setcolorat-unexpected-behavior/51483 -->
+<!-- 22. https://strapi.io/blog/build-a-simple-3-d-portfolio-website-with-vite-react-three-js-and-strapi -->
+<!-- 23. https://github.com/Mayank-141-Shaw/Portfolio -->
+<!-- 24. https://github.com/Reubzzz/my-portfolio -->
+<!-- 25. https://github.com/DanielWeinert-dw073/Resume97 -->
+<!-- 26. https://stackoverflow.com/questions/67812760/javascript-code-not-running-on-a-live-sever-nor-local-host -->
+<!-- 27. https://github.com/sjip1492/sarahjade-site -->
+<!-- 28. https://stackoverflow.com/questions/69402440/convert-form-data-with-multiple-fields-to-json-jquery-javascript -->
